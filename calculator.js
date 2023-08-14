@@ -1,82 +1,105 @@
+const calc = require('./Operations')
 const prompt = require("prompt-sync")();
-const cal = require('./Operations')
 
-function operations(op ,num){
+function evaluate(expression)
+{
+    let tokens = expression.split('');
+    let values = [];
+    let ops = [];
 
-  switch(op){
-    case '+' :
-        
-        return "the result is : "+ cal.addition(num);
-        break;
-
-    case '-': 
-        return "the result is : "+cal.subtraction(num);
-        break ;
-    
-    case'*' : 
-        return "the result is : "+cal.multiplication(num);
-        break ;
-
-    case '/'  :
-        return "the result is : "+cal.dividtion(num);   
-        break;
-     default:
-        return "Allowed operations are :\n"+"* for multiplication \n"+"/ to dividtion \n"+" - to subtraction \n "+"+ to addition \n"
-     
-    
-}
-  
-}
-function is_valid_input(input){
-    if ( isNaN(input)) {
-        return false
-       }else {
-         return true  // if it valid
-       } 
-}
-function set_inputs(digits){
-    let num =[]
-        for(let i=0 ; i<digits ; i++){
-           let input = parseInt ( prompt("enter number "+"("+ (i+1)+") :" ))        
-           if (is_valid_input(input) === true){
-            num[i] = input   // it must be valid number
-           }
-           else {
-           throw new Error("this is not valid number")
-            }      
+    for (let i = 0; i < tokens.length; i++)
+    {
+        if (tokens[i] == ' '){continue;}
+        if (tokens[i] >= '0' && tokens[i] <= '9') // number 
+        {
+            // if it more than one digits in number
+            let sbuf = ""; 
+            while (i < tokens.length &&  tokens[i] >= '0' && tokens[i] <= '9')
+            {sbuf = sbuf + tokens[i++];}
+            values.push(parseInt(sbuf, 10));
             
+           // Right now the i points to the character next to the digit, since the for loop also increases the i, we would skip one  token position; 
+           //we need to decrease the value of i by 1 to correct the offset.
+              i--;
         }
-    return num
+    
+        else if (tokens[i] == '(')
+        {
+            ops.push(tokens[i]);
+        }
+        else if (tokens[i] == ')')
+        {
+            while (ops[ops.length - 1] != '(')
+            {
+              values.push( operations (ops.pop() ,values.pop() ,values.pop())  );
+            }
+            ops.pop(); // delete the ( becuse it is empty 
+        }
+        else if (tokens[i] == '+' ||  tokens[i] == '-' || tokens[i] == '*' || tokens[i] == '/')
+        {
+              
+            // While top of 'ops' has same or greater precedence to current token, which is an operator.
+            // Apply operator on top of 'ops' to top two elements in values stack
+            while (ops.length > 0 && hasPrecedence(tokens[i], ops[ops.length - 1]))
+            {
+              values.push(operations (ops.pop(), values.pop(),values.pop()));
+            }
+            ops.push(tokens[i]);
+        }
+    }
+    // Entire expression has been parsed at this point, apply remaining ops to remaining values
+    while (ops.length > 0)
+    {
+        values.push(operations (ops.pop(), values.pop(),values.pop()));
+    }
+    // Top of 'values' containe return it
+    return values.pop();
 }
-function calculator_body (digits){ 
+// Returns true if 'op2' has higher or same precedence as 'op1', otherwise returns false.
+function hasPrecedence(operent1, operent2)
+{
+    if (operent2 == '(' || operent2 == ')')
+    {
+        return false;
+    }
+    if ((operent1 == '*' || operent1 == '/') &&
+           (operent2 == '+' || operent2 == '-'))
+    {
+        return false;
+    }
+    else
+    {
+        return true;
+    }
+}
 
-    if(digits<=1 || isNaN(digits) ){ console.log("At least the number of digits must be 2") }
-    else{
-        try {
-            let num =  set_inputs(digits) 
-            console.log("=============================*_*==================================")
-            let op =prompt("Enter the selected operation ('+' ,'-' ,'/' ,'*'): ")
-            console.log(operations(op , num))
-            console.log("=============================*_*==================================")     
-        } catch (error) {
-            console.log(error.message)
+function operations (operent, number2, number1)
+{
+    switch (operent)
+    {
+    case '+':
+        return calc.addition(number1 , number2); 
+    case '-':
+        return calc.subtraction(number1 , number2);  
+    case '*':
+        return calc.multiplication(number1 , number2); 
+    case '/':
+        if (number2 == 0)
+        {
+            console.log("Cannot divide by zero");
         }
-        finally{
-            if (prompt("Do you want to exit ? (If you want to exit,ENTER 1 ,to continue, press anything else )" ) == 1) {return exit=true}
-        }
-        }       
+        return calc.dividtion(number1 , number2); 
+    }
+    return 0;
 }
 function main(){
     let exit = false ;
-    while(exit != true){
-        console.log("=============================*_*==================================")
-        let digits =prompt("Enter the number of numbers you want to calculate (At least 2 ):  ")
-        console.log("=============================*_*==================================")
-        exit =calculator_body(digits)
+    while(exit === false){
+        console.log(evaluate(prompt("enter the values : ")))
+        
+        if(prompt("Do you Want to exit (if yes enter y , if no enter any thing eles)\n") === 'y') exit=true
     }
 
+    
 }
-
-main()   
-
-
+main()

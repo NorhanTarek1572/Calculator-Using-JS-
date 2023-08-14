@@ -1,40 +1,20 @@
-function addition (nums){
+function addition (num1 ,num2){
   
-    let result =0
-    for( i=0 ; i< nums.length ; i++){
-      result =  parseInt (nums[i]) + result
-    }
-    
-   return result
+   return (parseInt(num1)+parseInt(num2))
+ 
 }
 
-function subtraction(nums){
-    let result =nums[0]
-    for( i=1 ; i< nums.length ; i++){
-      result = result- parseInt (nums[i])  
-    }
-    
-   return result
+function subtraction(num1 ,num2){
+
+    return (parseInt(num1)-parseInt(num2))
 }
 
-function multiplication(nums){
-    let result =1
-    for( i=0 ; i< nums.length ; i++){
-      result = result * parseInt (nums[i])  
-    }
-    
-   return result
+function multiplication(num1 ,num2){
+  return (parseInt(num1)* parseInt(num2))
 }
 
-function dividtion(nums){
-    let result =nums[0]
-
-    for( i=1; i< nums.length ; i++){
-     
-     result = result/ parseInt (nums[i])  
-    }
-    
-   return result
+function dividtion(num1 ,num2){
+  return (parseInt(num1) / parseInt(num2))
 }
 
 module.exports ={ subtraction , multiplication , dividtion ,addition}
